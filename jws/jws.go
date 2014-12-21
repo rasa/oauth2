@@ -4,7 +4,7 @@
 
 // Package jws provides encoding and decoding utilities for
 // signed JWS messages.
-package jws // import "golang.org/x/oauth2/jws"
+package jws // import "github.com/rasa/oauth2-fork-b3f9a68/jws"
 
 import (
 	"bytes"

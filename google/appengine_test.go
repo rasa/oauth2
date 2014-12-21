@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/oauth2"
+	"github.com/rasa/oauth2-fork-b3f9a68"
 
 	"appengine"
 	"appengine/memcache"

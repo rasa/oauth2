@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"testing"
 
-	"golang.org/x/oauth2"
+	"github.com/rasa/oauth2-fork-b3f9a68"
 )
 
 // TODO(jbd): Remove after Go 1.4.
