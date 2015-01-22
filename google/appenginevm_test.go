@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/rasa/oauth2-fork-b3f9a68"
+	"golang.org/x/net/context"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/memcache"
 )
@@ -27,7 +28,7 @@ type mockMemcache struct {
 	getCount, setCount int
 }
 
-func (m *mockMemcache) Get(c appengine.Context, key string, tok *oauth2.Token) (*memcache.Item, error) {
+func (m *mockMemcache) Get(c context.Context, key string, tok *oauth2.Token) (*memcache.Item, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.getCount++
@@ -39,7 +40,7 @@ func (m *mockMemcache) Get(c appengine.Context, key string, tok *oauth2.Token) (
 	return nil, nil // memcache.Item is ignored anyway - return nil
 }
 
-func (m *mockMemcache) Set(c appengine.Context, item *memcache.Item) error {
+func (m *mockMemcache) Set(c context.Context, item *memcache.Item) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.setCount++
@@ -53,7 +54,7 @@ func (m *mockMemcache) Set(c appengine.Context, item *memcache.Item) error {
 
 var accessTokenCount = 0
 
-func mockAccessToken(c appengine.Context, scopes ...string) (token string, expiry time.Time, err error) {
+func mockAccessToken(c context.Context, scopes ...string) (token string, expiry time.Time, err error) {
 	accessTokenCount++
 	return "mytoken", time.Now(), nil
 }

@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"github.com/rasa/oauth2-fork-b3f9a68"
+	"golang.org/x/net/context"
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/memcache"
 )
 
@@ -39,7 +41,7 @@ func init() {
 }
 
 // AppEngineContext requires an App Engine request context.
-func AppEngineContext(ctx appengine.Context) oauth2.Option {
+func AppEngineContext(ctx context.Context) oauth2.Option {
 	return func(opts *oauth2.Options) error {
 		opts.TokenFetcherFunc = makeAppEngineTokenFetcher(ctx, opts)
 		return nil
@@ -49,7 +51,7 @@ func AppEngineContext(ctx appengine.Context) oauth2.Option {
 // FetchToken fetches a new access token for the provided scopes.
 // Tokens are cached locally and also with Memcache so that the app can scale
 // without hitting quota limits by calling appengine.AccessToken too frequently.
-func makeAppEngineTokenFetcher(ctx appengine.Context, opts *oauth2.Options) func(*oauth2.Token) (*oauth2.Token, error) {
+func makeAppEngineTokenFetcher(ctx context.Context, opts *oauth2.Options) func(*oauth2.Token) (*oauth2.Token, error) {
 	return func(existing *oauth2.Token) (*oauth2.Token, error) {
 		mu.Lock()
 		defer mu.Unlock()
@@ -85,7 +87,7 @@ func makeAppEngineTokenFetcher(ctx appengine.Context, opts *oauth2.Options) func
 			Object:     *t,
 			Expiration: expiry.Sub(now),
 		}); err != nil {
-			ctx.Errorf("unexpected memcache.Set error: %v", err)
+			log.Errorf(ctx, "unexpected memcache.Set error: %v", err)
 		}
 		return t, nil
 	}
@@ -94,15 +96,15 @@ func makeAppEngineTokenFetcher(ctx appengine.Context, opts *oauth2.Options) func
 // aeMemcache wraps the needed Memcache functionality to make it easy to mock
 type aeMemcache struct{}
 
-func (m *aeMemcache) Get(c appengine.Context, key string, tok *oauth2.Token) (*memcache.Item, error) {
+func (m *aeMemcache) Get(c context.Context, key string, tok *oauth2.Token) (*memcache.Item, error) {
 	return memcache.Gob.Get(c, key, tok)
 }
 
-func (m *aeMemcache) Set(c appengine.Context, item *memcache.Item) error {
+func (m *aeMemcache) Set(c context.Context, item *memcache.Item) error {
 	return memcache.Gob.Set(c, item)
 }
 
 type memcacher interface {
-	Get(c appengine.Context, key string, tok *oauth2.Token) (*memcache.Item, error)
-	Set(c appengine.Context, item *memcache.Item) error
+	Get(c context.Context, key string, tok *oauth2.Token) (*memcache.Item, error)
+	Set(c context.Context, item *memcache.Item) error
 }
